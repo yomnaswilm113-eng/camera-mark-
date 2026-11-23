@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATTENDX — Add Student</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .form-group.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-label {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .action-row {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    /* Camera + progress */
+    .camera-section {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+      padding-top: 0.5rem;
+    }
+
+    .nx-video {
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .capture-overlay {
+      position: relative;
+      display: inline-block;
+    }
+
+    .scan-ring {
+      position: absolute;
+      inset: 12px;
+      border-radius: 50%;
+      border: 2px solid var(--cyan);
+      opacity: 0;
+      box-shadow: 0 0 20px var(--cyan);
+      transition: opacity 0.3s;
+      pointer-events: none;
+    }
+
+    .scanning .scan-ring {
+      opacity: 0.6;
+      animation: scanPulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes scanPulse {
+
+      0%,
+      100% {
+        transform: scale(0.97)
+      }
+
+      50% {
+        transform: scale(1.02)
+      }
+    }
+
+    .capture-info {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 480px;
+    }
+
+    #captureStatus {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--cyan);
+    }
+
+    /* Layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    @media(max-width:800px) {
+      .two-col {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nx-nav">
+    <a class="nx-brand" href="/"><span class="nx-brand-icon">◈</span><span>ATTENDX</span></a>
+    <div class="nx-nav-links">
+      <a href="/" class="nx-link">Dashboard</a>
+      <a href="/add_student" class="nx-link active">Add Student</a>
+      <a href="/mark_attendance" class="nx-link">Mark Attendance</a>
+      <a href="/students_page" class="nx-link">Students</a>
+      <a href="/attendance_record" class="nx-link">Records</a>
+    </div>
+  </nav>
+
+  <main class="nx-page">
+    <a href="/" class="nx-back">← Back to Dashboard</a>
+    <h1 class="nx-title nx-fade-in">Enroll <span class="accent">New Student</span></h1>
+    <p class="nx-subtitle nx-fade-in nx-s1">Register identity · Capture biometric data</p>
+
+    <div class="two-col">
+      <!-- LEFT: Form -->
+      <div class="nx-card nx-fade-in nx-s2">
+        <p class="nx-card-title">Student Information</p>
+        <form id="studentForm">
+          <div class="form-grid">
+            <div class="form-group full">
+              <label class="form-label">Full Name *</label>
+              <input class="nx-input" name="name" placeholder="Enter full name" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Roll No.</label>
+              <input class="nx-input" name="roll" placeholder="e.g. 042">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Registration No.</label>
+              <input class="nx-input" name="reg_no" placeholder="e.g. 2024-CS-001">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Class</label>
+              <input class="nx-input" name="class" placeholder="e.g. 10, A-Level">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Section</label>
+              <input class="nx-input" name="sec" placeholder="e.g. A, B">
+            </div>
+          </div>
+          <div class="action-row">
+            <button type="submit" id="saveInfoBtn" class="nx-btn nx-btn-primary">Save Info</button>
+            <button type="button" id="startCaptureBtn" class="nx-btn nx-btn-ghost" disabled>◉ Start Capture
+              (50)</button>
+            <button type="button" id="addStudentBtn" class="nx-btn nx-btn-success" disabled>✓ Finish</button>
+          </div>
+        </form>
+
+        <!-- Status display -->
+        <div id="statusBox" style="display:none; margin-top:1.25rem;">
+          <div class="nx-divider"></div>
+          <div class="capture-info">
+            <span id="captureStatus">Captured 0 / 50</span>
+            <span id="uploadStatus"
+              style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);"></span>
+          </div>
+          <div class="nx-progress-track" style="margin-top:0.5rem;">
+            <div class="nx-progress-fill" id="progressBar" style="width:0%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Camera -->
+      <div class="nx-card nx-fade-in nx-s3" style="display:flex;align-items:center;justify-content:center;">
+        <div class="camera-section">
+          <div class="capture-overlay" id="cameraWrap">
+            <video id="video" autoplay muted class="nx-video" style="background:#0d0f18;min-height:200px;"></video>
+            <div class="scan-ring" id="scanRing"></div>
+          </div>
+          <p style="font-family:var(--font-mono);font-size:0.72rem;color:var(--text-muted);text-align:center;">
+            Camera feed · Face capture module
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/camera_add_student.js') }}"></script>
+  <script>
+    // Activate scan animation while capturing
+    const origLoop = window.captureImagesLoop;
+    const cameraWrap = document.getElementById('cameraWrap');
+    const statusBox = document.getElementById('statusBox');
+
+    document.getElementById('startCaptureBtn').addEventListener('click', () => {
+      cameraWrap.classList.add('scanning');
+      statusBox.style.display = 'block';
+    });
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,522 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATTENDX — {{ student.name }}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* Hero */
+    .profile-hero {
+      display: flex;
+      align-items: flex-start;
+      gap: 1.75rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.25rem;
+    }
+
+    .profile-hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan) 40%, var(--green) 70%, transparent);
+    }
+
+    /* Decorative corner glyph */
+    .profile-hero::after {
+      content: '◈';
+      position: absolute;
+      bottom: 1.25rem;
+      right: 1.5rem;
+      font-size: 3rem;
+      color: rgba(0, 212, 255, 0.05);
+      line-height: 1;
+      pointer-events: none;
+    }
+
+    .big-avatar {
+      width: 84px;
+      height: 84px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, #0d1530, #1a2550);
+      border: 1px solid var(--border-hot);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 600;
+      flex-shrink: 0;
+      box-shadow: 0 0 28px rgba(0, 212, 255, 0.18);
+    }
+
+    .hero-info {
+      flex: 1;
+    }
+
+    .hero-name {
+      font-size: 1.7rem;
+      font-weight: 800;
+      color: var(--text);
+      letter-spacing: -0.3px;
+      margin-bottom: 0.2rem;
+    }
+
+    .hero-mono {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      margin-bottom: 1.1rem;
+    }
+
+    .info-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .info-chip {
+      display: flex;
+      flex-direction: column;
+      padding: 0.45rem 0.85rem;
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .chip-label {
+      font-family: var(--font-mono);
+      font-size: 0.58rem;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .chip-value {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--text);
+      margin-top: 1px;
+    }
+
+    .chip-value.empty {
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+
+    /* Stat pills */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .stat-pill {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem 1.25rem 1rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-pill:hover {
+      border-color: var(--border-hot);
+    }
+
+    .stat-pill .pill-line {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+    }
+
+    .stat-pill.green .pill-line {
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+
+    .stat-pill.cyan .pill-line {
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+
+    .stat-pill.amber .pill-line {
+      background: var(--amber);
+      box-shadow: 0 0 8px var(--amber);
+    }
+
+    .pill-val {
+      font-family: var(--font-mono);
+      font-size: 2rem;
+      font-weight: 600;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .pill-val.green {
+      color: var(--green);
+      text-shadow: 0 0 14px rgba(0, 255, 157, 0.4);
+    }
+
+    .pill-val.cyan {
+      color: var(--cyan);
+      text-shadow: 0 0 14px rgba(0, 212, 255, 0.4);
+    }
+
+    .pill-val.amber {
+      color: var(--amber);
+      text-shadow: 0 0 14px rgba(255, 184, 0, 0.4);
+    }
+
+    .pill-label {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 0.35rem;
+    }
+
+    .pill-sub {
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+
+    /* Charts row */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Heatmap */
+    .heatmap {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .hx {
+      width: 26px;
+      height: 26px;
+      border-radius: 5px;
+      cursor: default;
+      position: relative;
+      transition: transform 0.15s;
+    }
+
+    .hx:hover {
+      transform: scale(1.25);
+      z-index: 5;
+    }
+
+    .hx.p {
+      background: var(--green);
+      box-shadow: 0 0 6px rgba(0, 255, 157, 0.5);
+    }
+
+    .hx.a {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+    }
+
+    .hx .htip {
+      display: none;
+      position: absolute;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg1);
+      border: 1px solid var(--border-hot);
+      color: var(--text);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      white-space: nowrap;
+      z-index: 20;
+    }
+
+    .hx:hover .htip {
+      display: block;
+    }
+
+    .hmap-legend {
+      display: flex;
+      gap: 1.25rem;
+      margin-top: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .hmap-legend span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .dot-p {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--green);
+    }
+
+    .dot-a {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+    }
+
+    /* Records table */
+    .nx-table .badge-p {
+      background: var(--green-dim);
+      color: var(--green);
+      border: 1px solid rgba(0, 255, 157, 0.25);
+      padding: 0.15rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.65rem;
+      font-family: var(--font-mono);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    @media(max-width:760px) {
+      .profile-hero {
+        flex-direction: column;
+      }
+
+      .stats-row {
+        grid-template-columns: 1fr;
+      }
+
+      .charts-row {
+        grid-template-columns: 1fr;
+      }
+
+      .big-avatar {
+        width: 60px;
+        height: 60px;
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nx-nav">
+    <a class="nx-brand" href="/"><span class="nx-brand-icon">◈</span><span>ATTENDX</span></a>
+    <div class="nx-nav-links">
+      <a href="/" class="nx-link">Dashboard</a>
+      <a href="/add_student" class="nx-link">Add Student</a>
+      <a href="/mark_attendance" class="nx-link">Mark Attendance</a>
+      <a href="/students_page" class="nx-link">Students</a>
+      <a href="/attendance_record" class="nx-link">Records</a>
+    </div>
+  </nav>
+
+  <main class="nx-page">
+    <a href="/students_page" class="nx-back">← Student Registry</a>
+
+    <!-- Hero -->
+    <div class="profile-hero nx-fade-in">
+      <div class="big-avatar">{{ student.name[0]|upper }}</div>
+      <div class="hero-info">
+        <h1 class="hero-name">{{ student.name }}</h1>
+        <p class="hero-mono">STUDENT ID #{{ student.id }} · ENROLLED {{ student.created_at[:10] if student.created_at
+          else 'N/A' }}</p>
+        <div class="info-chips">
+          <div class="info-chip">
+            <span class="chip-label">Roll</span>
+            <span class="chip-value {% if not student.roll %}empty{% endif %}">{{ student.roll or '—' }}</span>
+          </div>
+          <div class="info-chip">
+            <span class="chip-label">Class</span>
+            <span class="chip-value {% if not student.class %}empty{% endif %}">{{ student.class or '—' }}</span>
+          </div>
+          <div class="info-chip">
+            <span class="chip-label">Section</span>
+            <span class="chip-value {% if not student.section %}empty{% endif %}">{{ student.section or '—' }}</span>
+          </div>
+          <div class="info-chip">
+            <span class="chip-label">Reg. No</span>
+            <span class="chip-value {% if not student.reg_no %}empty{% endif %}">{{ student.reg_no or '—' }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stat Pills (filled by JS) -->
+    <div class="stats-row nx-fade-in nx-s1">
+      <div class="stat-pill green">
+        <div class="pill-val green" id="pTotal">—</div>
+        <div class="pill-label">Days Present</div>
+        <div class="pill-sub">all time</div>
+        <div class="pill-line"></div>
+      </div>
+      <div class="stat-pill cyan">
+        <div class="pill-val cyan" id="pRate">—</div>
+        <div class="pill-label">Attendance Rate</div>
+        <div class="pill-sub">last 30 days</div>
+        <div class="pill-line"></div>
+      </div>
+      <div class="stat-pill amber">
+        <div class="pill-val amber" id="pStreak">—</div>
+        <div class="pill-label">Current Streak</div>
+        <div class="pill-sub">consecutive days</div>
+        <div class="pill-line"></div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-row nx-fade-in nx-s2">
+      <div class="nx-card">
+        <p class="nx-card-title">30-Day Attendance Chart</p>
+        <div style="position:relative;height:200px;">
+          <canvas id="barChart"></canvas>
+        </div>
+      </div>
+      <div class="nx-card">
+        <p class="nx-card-title">Presence Heatmap</p>
+        <div class="heatmap" id="heatmap"></div>
+        <div class="hmap-legend">
+          <span><i class="dot-p"></i> Present</span>
+          <span><i class="dot-a"></i> Absent</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Records -->
+    <div class="nx-card nx-fade-in nx-s3">
+      <p class="nx-card-title">Recent Attendance Log</p>
+      {% if attendance_dates %}
+      <div style="overflow-x:auto;">
+        <table class="nx-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for ts in attendance_dates[:25] %}
+            <tr>
+              <td>{{ loop.index }}</td>
+              <td>{{ ts[:10] }}</td>
+              <td>{{ ts[11:19] if ts|length > 10 else '—' }}</td>
+              <td><span class="badge-p">PRESENT</span></td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% if attendance_dates|length > 25 %}
+      <p
+        style="text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-muted);margin-top:0.75rem;">
+        Showing 25 of {{ attendance_dates|length }} records
+      </p>
+      {% endif %}
+      {% else %}
+      <div
+        style="text-align:center;padding:2.5rem;font-family:var(--font-mono);font-size:0.78rem;color:var(--text-muted);">
+        No attendance records found for this student.
+      </div>
+      {% endif %}
+    </div>
+  </main>
+
+  <script>
+    const studentId = "{{ student.id }}";
+
+    async function loadStats() {
+      const res = await fetch(`/student_stats/${studentId}`);
+      const data = await res.json();
+
+      document.getElementById('pTotal').textContent = data.total;
+      const rate = Math.round((data.present.reduce((a, b) => a + b, 0) / 30) * 100);
+      document.getElementById('pRate').textContent = rate + '%';
+      document.getElementById('pStreak').textContent = data.streak;
+
+      // Bar chart
+      const ctx = document.getElementById('barChart').getContext('2d');
+      const g = ctx.createLinearGradient(0, 0, 0, 200);
+      g.addColorStop(0, 'rgba(0,255,157,0.55)');
+      g.addColorStop(1, 'rgba(0,255,157,0.02)');
+      new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: data.dates,
+          datasets: [{
+            data: data.present,
+            backgroundColor: data.present.map(v => v ? g : 'rgba(255,255,255,0.04)'),
+            borderColor: data.present.map(v => v ? 'rgba(0,255,157,0.8)' : 'rgba(255,255,255,0.06)'),
+            borderWidth: 1,
+            borderRadius: 3,
+            borderSkipped: false,
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#0d0f18',
+              borderColor: 'rgba(0,255,157,0.3)',
+              borderWidth: 1,
+              titleColor: '#00ff9d',
+              bodyColor: '#5a6480',
+              titleFont: { family: 'IBM Plex Mono', size: 10 },
+              bodyFont: { family: 'IBM Plex Mono', size: 10 },
+              callbacks: { label: ctx => ctx.parsed.y === 1 ? 'Present' : 'Absent' }
+            }
+          },
+          scales: {
+            x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#5a6480', font: { family: 'IBM Plex Mono', size: 8 }, maxRotation: 45 } },
+            y: { min: 0, max: 1, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: '#5a6480', font: { family: 'IBM Plex Mono', size: 9 }, stepSize: 1, callback: v => v === 1 ? '✓' : '' } }
+          }
+        }
+      });
+
+      // Heatmap
+      const hm = document.getElementById('heatmap');
+      hm.innerHTML = '';
+      data.dates.forEach((d, i) => {
+        const c = document.createElement('div');
+        c.className = 'hx ' + (data.present[i] ? 'p' : 'a');
+        c.innerHTML = `<span class="htip">${d}</span>`;
+        hm.appendChild(c);
+      });
+    }
+
+    loadStats();
+  </script>
+</body>
+
+</html>

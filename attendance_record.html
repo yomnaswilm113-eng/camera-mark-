@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATTENDX — Records</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 1.5rem 0 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .filter-btn {
+      padding: 0.35rem 0.9rem;
+      border-radius: var(--radius);
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      background: var(--bg2);
+      transition: all 0.18s;
+    }
+
+    .filter-btn:hover,
+    .filter-btn.active {
+      color: var(--cyan);
+      border-color: var(--border-hot);
+      background: var(--cyan-dim);
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    .nx-table td a {
+      color: var(--cyan);
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .nx-table td a:hover {
+      text-decoration: underline;
+    }
+
+    .count-badge {
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: 0.5rem;
+    }
+
+    .empty-row td {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 3rem;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nx-nav">
+    <a class="nx-brand" href="/"><span class="nx-brand-icon">◈</span><span>ATTENDX</span></a>
+    <div class="nx-nav-links">
+      <a href="/" class="nx-link">Dashboard</a>
+      <a href="/add_student" class="nx-link">Add Student</a>
+      <a href="/mark_attendance" class="nx-link">Mark Attendance</a>
+      <a href="/students_page" class="nx-link">Students</a>
+      <a href="/attendance_record" class="nx-link active">Records</a>
+    </div>
+  </nav>
+
+  <main class="nx-page">
+    <a href="/" class="nx-back">← Back to Dashboard</a>
+
+    <div class="top-row nx-fade-in">
+      <div>
+        <h1 class="nx-title">Attendance <span class="accent">Records</span></h1>
+        <p class="nx-subtitle">Logged sessions · filtered view</p>
+      </div>
+      <div style="display:flex;gap:0.65rem;flex-wrap:wrap;">
+        <a class="nx-btn nx-btn-ghost" href="/students_page">▤ Students</a>
+        <a class="nx-btn nx-btn-primary" href="/download_csv">↓ Export CSV</a>
+      </div>
+    </div>
+
+    <div class="filter-row nx-fade-in nx-s1">
+      <span
+        style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;margin-right:0.25rem;">Filter:</span>
+      <a href="/attendance_record?period=all" class="filter-btn {% if period == 'all' %}active{% endif %}">All Time</a>
+      <a href="/attendance_record?period=daily" class="filter-btn {% if period == 'daily' %}active{% endif %}">Today</a>
+      <a href="/attendance_record?period=weekly" class="filter-btn {% if period == 'weekly' %}active{% endif %}">This
+        Week</a>
+      <a href="/attendance_record?period=monthly" class="filter-btn {% if period == 'monthly' %}active{% endif %}">This
+        Month</a>
+    </div>
+
+    <div class="nx-card nx-fade-in nx-s2">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+        <p class="nx-card-title" style="margin:0">Log Entries</p>
+        <span class="count-badge">{{ records|length }} record{{ 's' if records|length != 1 else '' }}</span>
+      </div>
+      <div class="table-wrap">
+        <table class="nx-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Student ID</th>
+              <th>Name</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if records %}
+            {% for r in records %}
+            <tr>
+              <td>{{ r[0] }}</td>
+              <td><span class="nx-badge nx-badge-cyan">{{ r[1] }}</span></td>
+              <td><a href="/student_profile/{{ r[1] }}">{{ r[2] }}</a></td>
+              <td>{{ r[3] }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr class="empty-row">
+              <td colspan="4">No records found for this period.</td>
+            </tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+</body>
+
+</html>

@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATTENDX — Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    /* ── Page-specific layout ── */
+    .dash-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.25rem;
+      margin-top: 2rem;
+    }
+
+    .dash-left {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .dash-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    /* Quick action buttons */
+    .qa-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: var(--radius);
+      text-decoration: none;
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      background: var(--bg1);
+      transition: all 0.2s;
+    }
+
+    .qa-btn .qa-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .qa-btn:hover {
+      color: var(--text);
+      border-color: var(--border-hot);
+      background: var(--bg3);
+    }
+
+    .qa-btn.cyan .qa-icon {
+      background: var(--cyan-dim);
+      color: var(--cyan);
+    }
+
+    .qa-btn.green .qa-icon {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .qa-btn.amber .qa-icon {
+      background: rgba(255, 184, 0, 0.12);
+      color: var(--amber);
+    }
+
+    .qa-btn.red .qa-icon {
+      background: rgba(255, 61, 90, 0.12);
+      color: var(--red);
+    }
+
+    /* Train section */
+    .train-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1rem;
+    }
+
+    #trainMsg {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.5rem;
+    }
+
+    /* Stat row */
+    .stat-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .stat-cell {
+      background: var(--bg2);
+      padding: 1rem;
+      text-align: center;
+    }
+
+    /* Chart */
+    #attendanceChart {
+      max-height: 280px;
+    }
+
+    /* Header top row */
+    .header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+    }
+
+    .live-dot {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--green);
+      letter-spacing: 1px;
+    }
+
+    .live-dot::before {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: 0.3
+      }
+    }
+
+    @media (max-width: 900px) {
+      .dash-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nx-nav">
+    <a class="nx-brand" href="/">
+      <span class="nx-brand-icon">◈</span>
+      <span>ATTENDX</span>
+    </a>
+    <div class="nx-nav-links">
+      <a href="/" class="nx-link active">Dashboard</a>
+      <a href="/add_student" class="nx-link">Add Student</a>
+      <a href="/mark_attendance" class="nx-link">Mark Attendance</a>
+      <a href="/students_page" class="nx-link">Students</a>
+      <a href="/attendance_record" class="nx-link">Records</a>
+    </div>
+  </nav>
+
+  <main class="nx-page">
+    <div class="header-row nx-fade-in">
+      <div>
+        <h1 class="nx-title">System <span class="accent">Dashboard</span></h1>
+        <p class="nx-subtitle">Facial Recognition Attendance · 2026</p>
+      </div>
+      <span class="live-dot">SYSTEM ONLINE</span>
+    </div>
+
+    <div class="dash-grid">
+      <!-- LEFT: Quick actions + stats -->
+      <div class="dash-left">
+        <div class="nx-card nx-fade-in nx-s1">
+          <p class="nx-card-title">Quick Access</p>
+          <div style="display:flex;flex-direction:column;gap:0.6rem;">
+            <a class="qa-btn cyan" href="/add_student">
+              <span class="qa-icon">＋</span> Add Student
+            </a>
+            <a class="qa-btn green" href="/mark_attendance">
+              <span class="qa-icon">◉</span> Mark Attendance
+            </a>
+            <a class="qa-btn amber" href="/students_page">
+              <span class="qa-icon">▤</span> View Students
+            </a>
+            <a class="qa-btn red" href="/attendance_record">
+              <span class="qa-icon">⊞</span> Records
+            </a>
+          </div>
+        </div>
+
+        <div class="nx-card nx-fade-in nx-s2">
+          <p class="nx-card-title">System Stats</p>
+          <div class="stat-row">
+            <div class="stat-cell">
+              <div class="nx-stat-value" id="statStudents" style="color:var(--cyan)">—</div>
+              <div class="nx-stat-label">Students</div>
+            </div>
+            <div class="stat-cell">
+              <div class="nx-stat-value" id="statToday" style="color:var(--green)">—</div>
+              <div class="nx-stat-label">Today</div>
+            </div>
+            <div class="stat-cell">
+              <div class="nx-stat-value" id="statTotal" style="color:var(--amber)">—</div>
+              <div class="nx-stat-label">Total</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Train + Chart -->
+      <div class="dash-right">
+        <div class="nx-card nx-fade-in nx-s3">
+          <div class="train-row">
+            <div>
+              <p class="nx-card-title" style="margin:0">Model Training</p>
+            </div>
+            <button id="trainBtn" class="nx-btn nx-btn-primary">⚡ Train Model</button>
+          </div>
+          <div class="nx-progress-track">
+            <div class="nx-progress-fill" id="trainProgress" style="width:0%"></div>
+          </div>
+          <div id="trainMsg">No training session yet.</div>
+        </div>
+
+        <div class="nx-card nx-fade-in nx-s4" style="flex:1;">
+          <p class="nx-card-title">Attendance · Last 30 Days</p>
+          <div style="position:relative;height:280px;">
+            <canvas id="attendanceChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // ── Stats loader ──────────────────────────────────────────────
+    async function loadSystemStats() {
+      try {
+        const sr = await fetch('/students');
+        const sd = await sr.json();
+        document.getElementById('statStudents').textContent = sd.students.length;
+
+        const ar = await fetch('/attendance_stats');
+        const ad = await ar.json();
+        const total = ad.counts.reduce((a, b) => a + b, 0);
+        const today = ad.counts[ad.counts.length - 1];
+        document.getElementById('statToday').textContent = today;
+        document.getElementById('statTotal').textContent = total;
+      } catch (e) { console.error(e); }
+    }
+    loadSystemStats();
+
+    // ── Train ─────────────────────────────────────────────────────
+    const trainBtn = document.getElementById('trainBtn');
+    const trainProgress = document.getElementById('trainProgress');
+    const trainMsg = document.getElementById('trainMsg');
+
+    async function pollStatus() {
+      const res = await fetch('/train_status');
+      const d = await res.json();
+      trainProgress.style.width = d.progress + '%';
+      trainMsg.textContent = d.message || '';
+      return d;
+    }
+
+    trainBtn.addEventListener('click', async () => {
+      trainBtn.disabled = true;
+      await fetch('/train_model');
+      trainMsg.textContent = 'Training started…';
+      const t = setInterval(async () => {
+        const s = await pollStatus();
+        if (s && s.progress >= 100) {
+          clearInterval(t);
+          trainBtn.disabled = false;
+        }
+      }, 1500);
+    });
+
+    // ── Chart ─────────────────────────────────────────────────────
+    let chart = null;
+    async function updateChart() {
+      const res = await fetch('/attendance_stats');
+      const data = await res.json();
+      const ctx = document.getElementById('attendanceChart').getContext('2d');
+      const gradient = ctx.createLinearGradient(0, 0, 0, 280);
+      gradient.addColorStop(0, 'rgba(0,212,255,0.45)');
+      gradient.addColorStop(1, 'rgba(0,212,255,0.02)');
+
+      if (!chart) {
+        chart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: data.dates,
+            datasets: [{
+              label: 'Attendance',
+              data: data.counts,
+              backgroundColor: gradient,
+              borderColor: 'rgba(0,212,255,0.7)',
+              borderWidth: 1,
+              borderRadius: 4,
+              borderSkipped: false,
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0d0f18',
+                borderColor: 'rgba(0,212,255,0.3)',
+                borderWidth: 1,
+                titleColor: '#00d4ff',
+                bodyColor: '#8892ab',
+                titleFont: { family: 'IBM Plex Mono', size: 11 },
+                bodyFont: { family: 'IBM Plex Mono', size: 11 },
+              }
+            },
+            scales: {
+              x: {
+                grid: { color: 'rgba(255,255,255,0.03)' },
+                ticks: { color: '#5a6480', font: { family: 'IBM Plex Mono', size: 9 }, maxRotation: 45 }
+              },
+              y: {
+                grid: { color: 'rgba(255,255,255,0.05)' },
+                ticks: { color: '#5a6480', font: { family: 'IBM Plex Mono', size: 10 } }
+              }
+            }
+          }
+        });
+      } else {
+        chart.data.labels = data.dates;
+        chart.data.datasets[0].data = data.counts;
+        chart.update();
+      }
+    }
+    updateChart();
+    setInterval(updateChart, 10000);
+  </script>
+</body>
+
+</html>

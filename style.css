@@ -1,0 +1,507 @@
+/* ============================================================
+   ATTENDX — Dark 2026 Global Stylesheet
+   Design: Deep-space noir, electric cyan, biometric dashboard
+   Fonts: Syne (display) + IBM Plex Mono (data)
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@300;400;500;600&display=swap');
+
+/* ── CSS Variables ─────────────────────────────────────────── */
+:root {
+  --bg: #07080d;
+  --bg1: #0d0f18;
+  --bg2: #111420;
+  --bg3: #171b2e;
+  --border: rgba(0, 212, 255, 0.12);
+  --border-hot: rgba(0, 212, 255, 0.45);
+  --cyan: #00d4ff;
+  --cyan-dim: rgba(0, 212, 255, 0.18);
+  --green: #00ff9d;
+  --green-dim: rgba(0, 255, 157, 0.15);
+  --amber: #ffb800;
+  --red: #ff3d5a;
+  --text: #e2e8f5;
+  --text-muted: #5a6480;
+  --text-dim: #8892ab;
+  --font-sans: 'Syne', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --glow-cyan: 0 0 24px rgba(0, 212, 255, 0.25);
+  --glow-green: 0 0 24px rgba(0, 255, 157, 0.25);
+}
+
+/* ── Reset & Base ──────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Grid-dot background texture */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, rgba(0, 212, 255, 0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Nav ───────────────────────────────────────────────────── */
+.nx-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  background: rgba(7, 8, 13, 0.88);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nx-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+}
+
+.nx-brand-icon {
+  color: var(--cyan);
+  font-size: 1.3rem;
+  filter: drop-shadow(0 0 8px var(--cyan));
+  animation: pulse-icon 3s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.nx-nav-links {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.nx-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.nx-link:hover,
+.nx-link.active {
+  color: var(--cyan);
+  border-color: var(--border);
+  background: var(--cyan-dim);
+}
+
+/* ── Page Layout ───────────────────────────────────────────── */
+.nx-page {
+  position: relative;
+  z-index: 1;
+  max-width: 1160px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 4rem;
+}
+
+/* ── Section Title ─────────────────────────────────────────── */
+.nx-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  color: var(--text);
+}
+
+.nx-title .accent {
+  color: var(--cyan);
+}
+
+.nx-subtitle {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+/* ── Cards ─────────────────────────────────────────────────── */
+.nx-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.25s, box-shadow 0.25s;
+}
+
+.nx-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+
+.nx-card:hover {
+  border-color: var(--border-hot);
+  box-shadow: var(--glow-cyan);
+}
+
+.nx-card:hover::before {
+  opacity: 1;
+}
+
+.nx-card-title {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* ── Buttons ───────────────────────────────────────────────── */
+.nx-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius);
+  font-family: var(--font-sans);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.nx-btn-primary {
+  background: var(--cyan);
+  color: var(--bg);
+  border-color: var(--cyan);
+}
+
+.nx-btn-primary:hover {
+  background: transparent;
+  color: var(--cyan);
+  box-shadow: var(--glow-cyan);
+}
+
+.nx-btn-ghost {
+  background: transparent;
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+.nx-btn-ghost:hover {
+  color: var(--cyan);
+  border-color: var(--border-hot);
+  background: var(--cyan-dim);
+}
+
+.nx-btn-danger {
+  background: transparent;
+  color: var(--red);
+  border-color: rgba(255, 61, 90, 0.3);
+}
+
+.nx-btn-danger:hover {
+  background: rgba(255, 61, 90, 0.12);
+  border-color: var(--red);
+  box-shadow: 0 0 20px rgba(255, 61, 90, 0.2);
+}
+
+.nx-btn-success {
+  background: transparent;
+  color: var(--green);
+  border-color: rgba(0, 255, 157, 0.3);
+}
+
+.nx-btn-success:hover {
+  background: var(--green-dim);
+  border-color: var(--green);
+  box-shadow: var(--glow-green);
+}
+
+/* ── Inputs ────────────────────────────────────────────────── */
+.nx-input {
+  width: 100%;
+  background: var(--bg1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  padding: 0.65rem 1rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.nx-input::placeholder {
+  color: var(--text-muted);
+}
+
+.nx-input:focus {
+  border-color: var(--border-hot);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.08);
+}
+
+/* ── Progress Bar ──────────────────────────────────────────── */
+.nx-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg3);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.nx-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cyan), var(--green));
+  transition: width 0.4s ease;
+  box-shadow: 0 0 10px var(--cyan);
+}
+
+/* ── Badge / Tag ───────────────────────────────────────────── */
+.nx-badge {
+  display: inline-block;
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+.nx-badge-cyan {
+  background: var(--cyan-dim);
+  color: var(--cyan);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+}
+
+.nx-badge-green {
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(0, 255, 157, 0.25);
+}
+
+.nx-badge-amber {
+  background: rgba(255, 184, 0, 0.12);
+  color: var(--amber);
+  border: 1px solid rgba(255, 184, 0, 0.25);
+}
+
+.nx-badge-red {
+  background: rgba(255, 61, 90, 0.12);
+  color: var(--red);
+  border: 1px solid rgba(255, 61, 90, 0.25);
+}
+
+/* ── Table ─────────────────────────────────────────────────── */
+.nx-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.nx-table th {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.nx-table td {
+  padding: 0.8rem 1rem;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.nx-table tr:hover td {
+  background: rgba(0, 212, 255, 0.03);
+  color: var(--text);
+}
+
+/* ── Video / Camera ────────────────────────────────────────── */
+.nx-video {
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  display: block;
+  width: 100%;
+  max-width: 560px;
+}
+
+/* ── Stat number ───────────────────────────────────────────── */
+.nx-stat-value {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1;
+}
+
+.nx-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+}
+
+/* ── Divider ───────────────────────────────────────────────── */
+.nx-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+  margin: 1.5rem 0;
+}
+
+/* ── Back Link ─────────────────────────────────────────────── */
+.nx-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  margin-bottom: 1.75rem;
+  transition: color 0.2s;
+}
+
+.nx-back:hover {
+  color: var(--cyan);
+}
+
+/* ── Fade-in animation ─────────────────────────────────────── */
+.nx-fade-in {
+  animation: fadeUp 0.45s ease both;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Stagger helpers ───────────────────────────────────────── */
+.nx-s1 {
+  animation-delay: 0.05s;
+}
+
+.nx-s2 {
+  animation-delay: 0.12s;
+}
+
+.nx-s3 {
+  animation-delay: 0.19s;
+}
+
+.nx-s4 {
+  animation-delay: 0.26s;
+}
+
+.nx-s5 {
+  animation-delay: 0.33s;
+}
+
+/* ── Scanline effect (decorative) ──────────────────────────── */
+.nx-scanline::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.04) 2px,
+      rgba(0, 0, 0, 0.04) 4px);
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 768px) {
+  .nx-nav {
+    padding: 0 1rem;
+  }
+
+  .nx-nav-links {
+    gap: 0;
+  }
+
+  .nx-link {
+    padding: 0.4rem 0.5rem;
+    font-size: 0.7rem;
+    letter-spacing: 0.5px;
+  }
+
+  .nx-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .nx-title {
+    font-size: 1.35rem;
+  }
+}

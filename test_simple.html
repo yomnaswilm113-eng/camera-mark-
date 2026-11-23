@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Camera Test Simple</title>
+</head>
+<body>
+    <h1>student cam</h1>
+
+    <button id="startMarkBtn">Start</button>
+    <button id="stopMarkBtn" disabled>Stop</button>
+    <video id="markVideo" width="640" height="480" autoplay muted></video>
+
+    <script>
+      const startMarkBtn = document.getElementById("startMarkBtn");
+      const stopMarkBtn = document.getElementById("stopMarkBtn");
+      const markVideo = document.getElementById("markVideo");
+      let markStream = null;
+
+      startMarkBtn.addEventListener("click", async () => {
+        startMarkBtn.disabled = true;
+        stopMarkBtn.disabled = false;
+        markStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        markVideo.srcObject = markStream;
+      });
+
+      stopMarkBtn.addEventListener("click", () => {
+        if (markStream) markStream.getTracks().forEach(t => t.stop());
+        startMarkBtn.disabled = false;
+        stopMarkBtn.disabled = true;
+      });
+    </script>
+</body>
+</html>

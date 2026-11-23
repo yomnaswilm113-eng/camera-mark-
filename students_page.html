@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ATTENDX — Students</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    .header-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-wrap {
+      position: relative;
+      margin-bottom: 1.5rem;
+    }
+
+    .search-wrap input {
+      padding-left: 2.5rem;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 0.9rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      pointer-events: none;
+    }
+
+    /* Grid */
+    .students-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 1rem;
+    }
+
+    .s-card {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+
+    .s-card::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+      opacity: 0;
+      transition: opacity 0.25s;
+    }
+
+    .s-card:hover {
+      border-color: var(--border-hot);
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-3px);
+      color: inherit;
+    }
+
+    .s-card:hover::after {
+      opacity: 1;
+    }
+
+    .s-card-top {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .s-avatar {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--bg3), #1a2040);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--cyan);
+      font-weight: 700;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+    }
+
+    .s-name {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+
+    .s-id {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .s-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .s-stats {
+      display: flex;
+      gap: 0;
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .s-stat {
+      flex: 1;
+      padding: 0.6rem 0.5rem;
+      text-align: center;
+      border-right: 1px solid var(--border);
+    }
+
+    .s-stat:last-child {
+      border-right: none;
+    }
+
+    .s-stat-val {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .s-stat-val.high {
+      color: var(--green);
+    }
+
+    .s-stat-val.mid {
+      color: var(--amber);
+    }
+
+    .s-stat-val.low {
+      color: var(--red);
+    }
+
+    .s-stat-lbl {
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-top: 1px;
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 5rem 2rem;
+      color: var(--text-muted);
+    }
+
+    .empty-state .e-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h4 {
+      color: var(--text-dim);
+      font-size: 1.1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .empty-state a {
+      color: var(--cyan);
+    }
+
+    @media(max-width:600px) {
+      .students-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav class="nx-nav">
+    <a class="nx-brand" href="/"><span class="nx-brand-icon">◈</span><span>ATTENDX</span></a>
+    <div class="nx-nav-links">
+      <a href="/" class="nx-link">Dashboard</a>
+      <a href="/add_student" class="nx-link">Add Student</a>
+      <a href="/mark_attendance" class="nx-link">Mark Attendance</a>
+      <a href="/students_page" class="nx-link active">Students</a>
+      <a href="/attendance_record" class="nx-link">Records</a>
+    </div>
+  </nav>
+
+  <main class="nx-page">
+    <a href="/" class="nx-back">← Back to Dashboard</a>
+
+    <div class="header-row nx-fade-in">
+      <div>
+        <h1 class="nx-title">Student <span class="accent">Registry</span></h1>
+        <p class="nx-subtitle">{{ students|length }} enrolled identities</p>
+      </div>
+      <a href="/add_student" class="nx-btn nx-btn-primary">＋ Enroll Student</a>
+    </div>
+
+    <div class="search-wrap nx-fade-in nx-s1">
+      <span class="search-icon">⌕</span>
+      <input type="text" class="nx-input" id="searchBox" placeholder="Search name, roll, class, section…"
+        oninput="filterCards()">
+    </div>
+
+    {% if students %}
+    <div class="students-grid" id="studentsGrid">
+      {% for s in students %}
+      {% set rate = ((s.total_attendance / 30) * 100)|int %}
+      {% set rate_capped = [rate, 100]|min %}
+     <a class="s-card nx-fade-in" 
+   style="animation-delay: {{ loop.index0 * 0.04 }}s">
+   href="/student_profile/{{ s.id }}"
+   data-search="{{ s.name|lower }} {{ (s.roll|string|lower) if s.roll else '' }}{{(s.class|string|lower) if s.class else '' }} {{ (s.section|string|lower) if s.section else '' }}"></a>
+        <div class="s-card-top">
+          <div class="s-avatar">{{ s.name[0]|upper }}</div>
+          <div>
+            <div class="s-name">{{ s.name }}</div>
+            <div class="s-id">ID #{{ s.id }}{% if s.reg_no %} · {{ s.reg_no }}{% endif %}</div>
+          </div>
+        </div>
+
+        <div class="s-tags">
+          {% if s.class %}<span class="nx-badge nx-badge-cyan">Class {{ s.class }}</span>{% endif %}
+          {% if s.section %}<span class="nx-badge nx-badge-green">Sec {{ s.section }}</span>{% endif %}
+          {% if s.roll %}<span class="nx-badge nx-badge-amber">Roll {{ s.roll }}</span>{% endif %}
+        </div>
+
+        <div class="s-stats">
+          <div class="s-stat">
+            <div class="s-stat-val">{{ s.total_attendance }}</div>
+            <div class="s-stat-lbl">Present</div>
+          </div>
+          <div class="s-stat">
+            <div
+              class="s-stat-val {% if rate_capped >= 75 %}high{% elif rate_capped >= 50 %}mid{% else %}low{% endif %}">
+              {{ rate_capped }}%
+            </div>
+            <div class="s-stat-lbl">30-Day</div>
+          </div>
+          <div class="s-stat">
+            <div class="s-stat-val" style="font-size:0.72rem;color:var(--text-dim);">
+              {{ s.last_seen or '—' }}
+            </div>
+            <div class="s-stat-lbl">Last Seen</div>
+          </div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="e-icon">◈</div>
+      <h4>No students enrolled</h4>
+      <p>Start by <a href="/add_student">enrolling a student</a>.</p>
+    </div>
+    {% endif %}
+  </main>
+
+  <script>
+    function filterCards() {
+      const q = document.getElementById('searchBox').value.toLowerCase();
+      document.querySelectorAll('.s-card').forEach(c => {
+        c.style.display = (c.dataset.search || '').includes(q) ? '' : 'none';
+      });
+    }
+  </script>
+</body>
+
+</html>
